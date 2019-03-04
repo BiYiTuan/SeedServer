@@ -1,0 +1,218 @@
+﻿
+<!DOCTYPE html>
+<!--
+/**
+ * KingTable 2.0.0
+ * https://github.com/RobertoPrevato/KingTable
+ *
+ * Copyright 2017, Roberto Prevato
+ *
+ * Licensed under the MIT license:
+ * http://www.opensource.org/licenses/MIT
+ */
+-->
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <!-- Force latest IE rendering engine or ChromeFrame if installed -->
+  <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
+  <title>PPeasy 供源发布工具</title>
+  <link rel="shortcut icon" type="image/png" href="ugr.png">
+  <meta name="author" content="PPeasy">
+  <link rel="stylesheet" type="text/css" href="examples.css">
+  <link rel="stylesheet" href="kingtable.css">
+  <style>
+    .king-table { white-space: nowrap; }
+  </style>
+</head>
+<body class="theme-flatwhite">
+  <header id="header">
+    <div id="logo-region">
+      <a href="index.html">
+        <img src="rp.png" alt="Roberto Prevato" width="91" height="50">
+      </a>
+	  
+      <h6><a href="/">PPeasy 供源发布工具</a></h6>
+    </div>
+  </header>
+    <div class="theme-region">
+	<span style="float:right;">
+	
+      <label for="theme">发布域名: </label>
+      <input id=publishdomain type=text value="" />
+		</span>
+	  <input id=actclick type=button value="发布文件" onclick='actclick()'/> 
+	  <input id=stopactclick type=button value="结束发布" onclick='stopactclick()'/> 
+	  <input id=delactclick type=button value="删除发布" onclick='delactclick()'/> 
+	  <input id=searchactclick type=button value="搜索并发布" onclick='localactclick()'/> 
+    </div>
+	<div id="inputurldiv" style="margin-left:5px;margin-right:10px;display:none;">
+	
+	<textarea id="urllist" style="width:100%;height:200px;"></textarea>
+	<input type=button value="确定" onclick="commiturl()"/>&nbsp;<input type=button value="取消" 
+		onclick="cancelclick()"/>
+	</div>
+  <div id="main"></div>
+  <script src="common.js"></script>
+  <script src="es6-promise.js"></script>
+  <script src="kingtable.js"></script>
+  <script src="jquery.min.js"></script>
+  <!-- for export to excel: -->
+  <script src="xlsx.core.min.js" async="async"></script>
+  <script src="blob.js" async="async"></script>
+  <script src="kingtable.xlsx.js"></script>
+  <script src="people.js"></script>
+  <script>
+  
+function getCookie(name)
+{
+var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+if(arr=document.cookie.match(reg))
+return unescape(arr[2]);
+else
+return null;
+} 
+function setCookie(c_name, value){
+	var exdate=new Date();
+	exdate.setDate(exdate.getDate() + 360);
+	document.cookie=c_name+ "=" + escape(value) + ((360==null) ? "" : ";expires="+exdate.toGMTString());
+} 
+Date.prototype.Format = function (fmt) { //author: meizz 
+        var o = {
+            "M+": this.getMonth() + 1, //月份 
+            "d+": this.getDate(), //日 
+            "h+": this.getHours(), //小时 
+            "m+": this.getMinutes(), //分 
+            "s+": this.getSeconds(), //秒 
+            "q+": Math.floor((this.getMonth() + 3) / 3), //季度 
+            "S": this.getMilliseconds() //毫秒 
+        };
+        if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+        for (var k in o)
+            if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+        return fmt;
+    };
+	var f;
+	var actstr="del";
+	function cancelclick(){
+		document.getElementById('actclick').disabled=false;
+		document.getElementById('stopactclick').disabled=false;
+		document.getElementById('delactclick').disabled=false;
+		document.getElementById('inputurldiv').style.display='none';
+	}
+	function commiturl(){
+		if(document.getElementById('actclick').disabled){
+			//alert(document.getElementById('publishdomain').value);
+			if(document.getElementById('publishdomain').value!=""){			
+				f.send("url:"+document.getElementById('publishdomain').value+"\n"+document.getElementById('urllist').value);
+				cancelclick();
+			}
+			else alert("发布域名为空");
+		}else{
+			f.send(actstr+":\n"+document.getElementById('urllist').value);
+			cancelclick();
+		}
+	}
+	function stopactclick(){
+		document.getElementById('urllist').value="";
+		document.getElementById('urllist').placeholder="点击选入要结束发布的文件";
+		//document.getElementById('stopactclick').setAttribute("disabled",false);
+		document.getElementById('inputurldiv').style.display='block';
+		document.getElementById('actclick').disabled=false;
+		document.getElementById('stopactclick').disabled=true;
+		document.getElementById('delactclick').disabled=false;
+		actstr="end";
+	}
+	function delactclick(){
+		document.getElementById('urllist').value="";
+		document.getElementById('urllist').placeholder="点击选入要删除的文件";
+		//document.getElementById('stopactclick').setAttribute("disabled",false);
+		document.getElementById('inputurldiv').style.display='block';
+		document.getElementById('actclick').disabled=false;
+		document.getElementById('stopactclick').disabled=false;
+		document.getElementById('delactclick').disabled=true;
+		actstr="del";
+	}
+	function localactclick(){
+		if(document.getElementById('publishdomain').value!="")
+			f.send("local:"+document.getElementById('publishdomain').value);
+		else alert("发布域名为空");
+	}
+	function actclick(){
+		document.getElementById('urllist').value="";
+		document.getElementById('urllist').placeholder="输入HTTP网址，每条源网址一行"; 
+		document.getElementById('inputurldiv').style.display='block';
+		document.getElementById('actclick').disabled=true;
+		document.getElementById('stopactclick').disabled=false;
+		document.getElementById('delactclick').disabled=false;
+	}
+	
+window.onload=function(){
+
+	if(getCookie("domain")){
+	document.getElementById('publishdomain').value=getCookie("domain");	
+	} 
+	
+	//f=new WebSocket("ws://127.0.0.1:8000/");
+	f=new WebSocket("ws://"+window.location.href.split("/")[2].split(":")[0]
+		+":"+(parseInt(window.location.href.split("/")[2].split(":")[1])-1)+"/");
+	f.onmessage=function(t){		 
+		if(t.data.substring(0,4)=='cfg:' && t.data.substring(4)!=""){	
+			document.getElementById('publishdomain').value=t.data.substring(4);	
+			setCookie("domain",t.data.substring(4));
+		}
+		if(t.data.substring(0,5)=='{data'){		
+			session=eval('('+t.data+')');	
+			KingTable.Schemas.DefaultByName.status = {
+				format: function (value, item) { 
+					//console.log(item);
+					if(value==6)	return "发布成功";
+					if(value==3)	return "发布失败";
+					if(value==2) return "发布成功";
+					//if(value==1)	return "发布中("+(item.len?Math.floor(item.rec*100/item.len):0)+"%)";
+					if(value==1)	return "发布完成";
+					if(value==0) return "结束";
+				}
+			  };
+			KingTable.Schemas.DefaultByName.date = {
+				format: function (value, item) { 
+				  return (new Date(value)).Format("yyyy-MM-dd hh:mm");
+				}
+			  }; 			
+			var table = window.table = new KingTable({
+			  id: "publishtable",
+			  data: session.data,
+			  caption: "源列表",
+			  onItemClick: function (item, e) {
+				  //console.log(item);
+				  if(document.getElementById('stopactclick').disabled==true
+					&& document.getElementById('urllist').value.indexOf(item.file+"\n")<0)
+				  document.getElementById('urllist').value+=item.file+"\n";
+				  if(document.getElementById('delactclick').disabled==true
+					&& document.getElementById('urllist').value.indexOf(item.file+"\n")<0)
+				  document.getElementById('urllist').value+=item.file+"\n";
+				},
+			  element: document.getElementById("main"),
+			  columns:{
+				Url:"路径",
+				file:"文件",
+				status:{
+					name:"状态"
+				},
+				date:"日期"
+			  },
+			  sortBy: "name"
+			  
+			}); 
+			table.render();
+		}
+	};  
+	f.onopen=function(evt){
+			f.send("");
+	};
+};
+    
+	
+  </script>
+</body>
+</html>

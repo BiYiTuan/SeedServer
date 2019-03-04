@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<!--
+/**
+ * KingTable 2.0.0
+ * https://github.com/RobertoPrevato/KingTable
+ *
+ * Copyright 2017, Roberto Prevato
+ *
+ * Licensed under the MIT license:
+ * http://www.opensource.org/licenses/MIT
+ */
+-->
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <!-- Force latest IE rendering engine or ChromeFrame if installed -->
+  <!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
+  <title>KingTable people demo</title>
+  <link rel="shortcut icon" type="image/png" href="ugr.png">
+  <meta name="author" content="Roberto Prevato">
+  <link rel="stylesheet" type="text/css" href="examples.css">
+  <link rel="stylesheet" href="kingtable.css">
+  <style>
+    .king-table { white-space: nowrap; }
+  </style>
+</head>
+<body class="theme-flatwhite">
+  <header id="header">
+    <div id="logo-region">
+      <a href="index.html">
+        <img src="rp.png" alt="Roberto Prevato" width="91" height="50">
+      </a>
+      <h6><a href="https://github.com/RobertoPrevato/KingTable">https://github.com/RobertoPrevato/KingTable</a></h6>
+    </div>
+  </header>
+    <div class="theme-region">
+      <label for="theme">Theme: </label>
+      <select id="theme">
+        <option value="theme-flatwhite" selected="selected">Flat white</option>
+        <option value="theme-flatblack">Flat black</option>
+        <option value="theme-clear">Clear</option>
+        <option value="theme-dark">Dark</option>
+        <option value="theme-midnight">Midnight</option>
+      </select>
+    </div>
+  <div id="main"></div>
+  <script src="common.js"></script>
+  <script src="es6-promise.js"></script>
+  <script src="kingtable.js"></script>
+
+  <!-- for export to excel: -->
+  <script src="xlsx.core.min.js" async="async"></script>
+  <script src="blob.js" async="async"></script>
+  <script src="kingtable.xlsx.js"></script>
+
+  <script src="people.js"></script>
+  <script>
+  (function () {
+
+    var table = window.table = new KingTable({
+      id: "people-table",
+      data: PEOPLE, // array of items: this demo shows a Fixed table (see tables mode wiki page for more information)
+      caption: "KingTable - people demo with client side pagination (whole collection in memory)",
+      element: document.getElementById("main"),
+      sortBy: "name",
+      columns: {
+        name: "Name",
+        email: "Email",
+        phone: "Phone",
+        birthdate:  "Birthdate" ,
+        isActive:  "Active" ,
+        _id: "_id",
+        address: "Address",
+        company: "Company",
+        gender: "Gender",
+        registered: "Registered"
+      }
+    });
+
+    table.render();
+  })();
+  </script>
+</body>
+</html>
